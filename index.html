@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Absensi Karyawan</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --accent: #e74c3c;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+            --success: #2ecc71;
+        }
+        
+        body {
+            background-color: #f8f9fa;
+            color: #333;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .navbar {
+            background-color: var(--primary);
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .card-header {
+            background-color: var(--primary);
+            color: white;
+            border-radius: 10px 10px 0 0 !important;
+        }
+        
+        .btn-primary {
+            background-color: var(--secondary);
+            border: none;
+        }
+        
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+        
+        .btn-danger {
+            background-color: var(--accent);
+            border: none;
+        }
+        
+        .login-container {
+            max-width: 400px;
+            margin: 100px auto;
+        }
+        
+        .dashboard-container {
+            padding: 20px;
+        }
+        
+        .attendance-table {
+            width: 100%;
+        }
+        
+        .attendance-table th {
+            background-color: var(--light);
+        }
+        
+        .status-present {
+            color: var(--success);
+            font-weight: bold;
+        }
+        
+        .status-absent {
+            color: var(--accent);
+            font-weight: bold;
+        }
+        
+        .action-buttons .btn {
+            margin-right: 5px;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        footer {
+            background: linear-gradient(135deg, var(--dark) 0%, #34495e 100%);
+            color: white;
+            padding: 40px 0 20px 0;
+            margin-top: 50px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--secondary), var(--success), var(--accent));
+        }
+        
+        .footer-content {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .team-section {
+            margin-bottom: 30px;
+        }
+        
+        .team-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #ffffff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .team-members {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .member-card {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .member-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .member-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--secondary), var(--success));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            font-size: 1.5rem;
+            color: white;
+        }
+        
+        .member-name {
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 0;
+            color: #ffffff;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .copyright-section {
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            padding-top: 20px;
+            text-align: center;
+        }
+        
+        .copyright-text {
+            margin: 0;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .year {
+            font-weight: 600;
+            color: var(--secondary);
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard-container {
+                padding: 10px;
+            }
+            
+            .table-responsive {
+                overflow-x: auto;
+            }
+            
+            .team-members {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            .member-card {
+                padding: 15px;
+            }
+            
+            footer {
+                padding: 30px 0 15px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-calendar-check me-2"></i>Sistem Absensi Karyawan
+            </a>
+            <button id="logoutBtn" class="btn btn-outline-light btn-sm hidden">
+                <i class="fas fa-sign-out-alt me-1"></i>Logout
+            </button>
+        </div>
+    </nav>
+
+    <!-- Login Section -->
+    <div class="container login-container" id="loginSection">
+        <div class="card">
+            <div class="card-header text-center">
+                <h4>Login Sistem</h4>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="username" class="form-label">Username</label>
+                    <input type="text" class="form-control" id="username" placeholder="Masukkan username">
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" class="form-control" id="password" placeholder="Masukkan password">
+                </div>
+                <button id="loginBtn" class="btn btn-primary w-100">
+                    <i class="fas fa-sign-in-alt me-1"></i>Login
+                </button>
+                <div id="loginError" class="alert alert-danger mt-3 hidden" role="alert"></div>
+                <div class="mt-3">
+                    <small class="text-muted">
+                    
+                    </small>
+                </div>
+                
+                <!-- Loading indicator -->
+                <div id="loadingIndicator" class="text-center mt-3 hidden">
+                    <div class="spinner-border spinner-border-sm text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <span class="ms-2">Memproses login...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Section -->
+    <div class="container dashboard-container hidden" id="dashboardSection">
+        <div class="row">
+            <div class="col-md-12">
+                <h2 class="mb-4">Dashboard Absensi Karyawan</h2>
+            </div>
+        </div>
+        
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="card-title">Total Hadir Hari Ini</h6>
+                                <h3 id="todayPresent">0</h3>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-check-circle fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-warning text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="card-title">Total Izin/Sakit</h6>
+                                <h3 id="todayAbsent">0</h3>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-exclamation-circle fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-info text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="card-title">Total Karyawan</h6>
+                                <h3 id="totalEmployees">0</h3>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-users fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="card-title">Kehadiran Bulan Ini</h6>
+                                <h3 id="monthlyAttendance">0%</h3>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-chart-line fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Filter Data</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label for="filterMonth" class="form-label">Bulan</label>
+                            <select class="form-select" id="filterMonth">
+                                <option value="">Semua Bulan</option>
+                                <option value="01">Januari</option>
+                                <option value="02">Februari</option>
+                                <option value="03">Maret</option>
+                                <option value="04">April</option>
+                                <option value="05">Mei</option>
+                                <option value="06">Juni</option>
+                                <option value="07">Juli</option>
+                                <option value="08">Agustus</option>
+                                <option value="09">September</option>
+                                <option value="10">Oktober</option>
+                                <option value="11">November</option>
+                                <option value="12">Desember</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label for="filterYear" class="form-label">Tahun</label>
+                            <select class="form-select" id="filterYear">
+                                <option value="">Semua Tahun</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label for="filterName" class="form-label">Nama Karyawan</label>
+                            <input type="text" class="form-control" id="filterName" placeholder="Cari nama karyawan">
+                        </div>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button id="applyFilter" class="btn btn-primary w-100 mb-3">Terapkan Filter</button>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="d-flex flex-wrap gap-2">
+                            <button id="exportBtn" class="btn btn-success btn-sm">
+                                <i class="fas fa-download me-1"></i>Export Data
+                            </button>
+                            <button id="importBtn" class="btn btn-info btn-sm">
+                                <i class="fas fa-upload me-1"></i>Import Data
+                            </button>
+                            <input type="file" id="importFile" accept=".json" class="hidden">
+                            <button id="clearAllBtn" class="btn btn-danger btn-sm">
+                                <i class="fas fa-trash me-1"></i>Hapus Semua Data
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Attendance Table -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Data Absensi</h5>
+                <button id="addDataBtn" class="btn btn-sm btn-primary">
+                    <i class="fas fa-plus me-1"></i>Tambah Data
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover attendance-table">
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>Tanggal</th>
+                                <th>Nama Karyawan</th>
+                                <th>Jam Masuk</th>
+                                <th>Jam Keluar</th>
+                                <th>Status</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="attendanceBody">
+                            <!-- Data akan diisi oleh JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Add/Edit Form -->
+        <div class="card mt-4 hidden" id="attendanceForm">
+            <div class="card-header">
+                <h5 class="mb-0" id="formTitle">Tambah Data Absensi</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label for="attendanceDate" class="form-label">Tanggal</label>
+                            <input type="date" class="form-control" id="attendanceDate">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label for="employeeName" class="form-label">Nama Karyawan</label>
+                            <input type="text" class="form-control" id="employeeName" placeholder="Nama karyawan">
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="mb-3">
+                            <label for="clockIn" class="form-label">Jam Masuk</label>
+                            <input type="time" class="form-control" id="clockIn">
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="mb-3">
+                            <label for="clockOut" class="form-label">Jam Keluar</label>
+                            <input type="time" class="form-control" id="clockOut">
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="mb-3">
+                            <label for="status" class="form-label">Status</label>
+                            <select class="form-select" id="status">
+                                <option value="Hadir">Hadir</option>
+                                <option value="Izin">Izin</option>
+                                <option value="Sakit">Sakit</option>
+                                <option value="Cuti">Cuti</option>
+                                <option value="Alpa">Alpa</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-end">
+                    <button id="cancelBtn" class="btn btn-secondary me-2">Batal</button>
+                    <button id="saveDataBtn" class="btn btn-primary">
+                        <span class="btn-text">Simpan Data</span>
+                        <span class="btn-spinner hidden">
+                            <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                            Menyimpan...
+                        </span>
+                    </button>
+                </div>
+                <div id="formMessage" class="alert alert-success mt-3 hidden" role="alert"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="hidden" id="footerSection">
+        <div class="container footer-content">
+            <div class="team-section">
+                <h3 class="team-title">Development Team</h3>
+                <div class="team-members">
+                    <div class="member-card">
+                        <div class="member-icon">
+                            <i class="fas fa-code"></i>
+                        </div>
+                        <p class="member-name">Raihan Nur Hidayat</p>
+                    </div>
+                    <div class="member-card">
+                        <div class="member-icon">
+                            <i class="fas fa-laptop-code"></i>
+                        </div>
+                        <p class="member-name">Abdurrouf Ghany</p>
+                    </div>
+                    <div class="member-card">
+                        <div class="member-icon">
+                            <i class="fas fa-database"></i>
+                        </div>
+                        <p class="member-name">Dava Syalfinar Dewangga</p>
+                    </div>
+                    <div class="member-card">
+                        <div class="member-icon">
+                            <i class="fas fa-user-cog"></i>
+                        </div>
+                        <p class="member-name">Yahya Setya Pas</p>
+                    </div>
+                </div>
+            </div>
+            <div class="copyright-section">
+             
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Data pengguna yang valid
+        const validUsers = [
+            { username: "admin", password: "admin123" },
+            { username: "hrd", password: "hrd123" }
+        ];
+
+        // Elemen DOM
+        const loginSection = document.getElementById('loginSection');
+        const dashboardSection = document.getElementById('dashboardSection');
+        const footerSection = document.getElementById('footerSection');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const loginBtn = document.getElementById('loginBtn');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const loginError = document.getElementById('loginError');
+        const attendanceBody = document.getElementById('attendanceBody');
+        const saveDataBtn = document.getElementById('saveDataBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const addDataBtn = document.getElementById('addDataBtn');
+        const attendanceForm = document.getElementById('attendanceForm');
+        const formTitle = document.getElementById('formTitle');
+        const formMessage = document.getElementById('formMessage');
+        const applyFilterBtn = document.getElementById('applyFilter');
+        
+        // Input form
+        const attendanceDate = document.getElementById('attendanceDate');
+        const employeeName = document.getElementById('employeeName');
+        const clockIn = document.getElementById('clockIn');
+        const clockOut = document.getElementById('clockOut');
+        const statusSelect = document.getElementById('status');
+        
+        // Elemen DOM tambahan
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const exportBtn = document.getElementById('exportBtn');
+        const importBtn = document.getElementById('importBtn');
+        const importFile = document.getElementById('importFile');
+        const clearAllBtn = document.getElementById('clearAllBtn');
+        
+        // Elemen statistik
+        const todayPresentEl = document.getElementById('todayPresent');
+        const todayAbsentEl = document.getElementById('todayAbsent');
+        const totalEmployeesEl = document.getElementById('totalEmployees');
+        const monthlyAttendanceEl = document.getElementById('monthlyAttendance');
+        
+        // State aplikasi
+        let isEditing = false;
+        let currentEditId = null;
+        let attendanceData = [];
+        
+        // Inisialisasi aplikasi
+        function initializeApp() {
+            initializeYearFilter();
+            setDefaultDate();
+            addEventListeners();
+            checkLoginStatus();
+        }
+        
+        // Inisialisasi tahun untuk filter
+        function initializeYearFilter() {
+            const currentYear = new Date().getFullYear();
+            filterYear.innerHTML = '<option value="">Semua Tahun</option>';
+            
+            for (let year = currentYear - 5; year <= currentYear + 1; year++) {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year;
+                if (year === currentYear) option.selected = true;
+                filterYear.appendChild(option);
+            }
+        }
+        
+        // Set tanggal default ke hari ini
+        function setDefaultDate() {
+            const today = new Date();
+            attendanceDate.value = today.toISOString().split('T')[0];
+        }
+        
+        // Tambah event listeners
+        function addEventListeners() {
+            loginBtn.addEventListener('click', handleLogin);
+            logoutBtn.addEventListener('click', handleLogout);
+            saveDataBtn.addEventListener('click', saveAttendanceData);
+            cancelBtn.addEventListener('click', cancelEdit);
+            addDataBtn.addEventListener('click', showForm);
+            applyFilterBtn.addEventListener('click', renderAttendanceData);
+            
+            // Event listeners baru
+            exportBtn.addEventListener('click', exportData);
+            importBtn.addEventListener('click', () => importFile.click());
+            importFile.addEventListener('change', importData);
+            clearAllBtn.addEventListener('click', clearAllData);
+            
+            // Enter key untuk login
+            passwordInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    handleLogin();
+                }
+            });
+            
+            // Real-time filter untuk nama
+            filterName.addEventListener('input', renderAttendanceData);
+            
+            // Auto-refresh statistik setiap 30 detik
+            setInterval(updateStatistics, 30000);
+        }
+        
+        // Fungsi untuk mengecek status login
+        function checkLoginStatus() {
+            try {
+                const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+                if (isLoggedIn) {
+                    showDashboard();
+                } else {
+                    showLogin();
+                }
+            } catch (error) {
+                console.error('Error checking login status:', error);
+                showLogin();
+            }
+        }
+        
+        // Fungsi untuk menangani login
+        function handleLogin() {
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value;
+            
+            // Validasi input
+            if (!username || !password) {
+                showError(loginError, 'Username dan password harus diisi');
+                return;
+            }
+            
+            // Tampilkan loading indicator
+            showLoadingIndicator(true);
+            loginBtn.disabled = true;
+            
+            // Simulasi delay untuk loading (dalam aplikasi nyata, ini untuk API call)
+            setTimeout(() => {
+                // Cek kredensial
+                const isValidUser = validUsers.some(
+                    user => user.username === username && user.password === password
+                );
+                
+                if (isValidUser) {
+                    try {
+                        localStorage.setItem('isLoggedIn', 'true');
+                        localStorage.setItem('currentUser', username);
+                        showDashboard();
+                    } catch (error) {
+                        console.error('Error saving login status:', error);
+                        showError(loginError, 'Terjadi kesalahan saat login');
+                    }
+                } else {
+                    showError(loginError, 'Username atau password salah');
+                }
+                
+                showLoadingIndicator(false);
+                loginBtn.disabled = false;
+            }, 1000);
+        }
+        
+        // Fungsi untuk menangani logout
+        function handleLogout() {
+            if (confirm('Apakah Anda yakin ingin logout?')) {
+                try {
+                    localStorage.removeItem('isLoggedIn');
+                    localStorage.removeItem('currentUser');
+                    showLogin();
+                    resetLoginForm();
+                } catch (error) {
+                    console.error('Error during logout:', error);
+                    showLogin();
+                    resetLoginForm();
+                }
+            }
+        }
+        
+        // Reset form login
+        function resetLoginForm() {
+            usernameInput.value = '';
+            passwordInput.value = '';
+            loginError.classList.add('hidden');
+        }
+        
+        // Fungsi untuk menampilkan halaman login
+        function showLogin() {
+            loginSection.classList.remove('hidden');
+            dashboardSection.classList.add('hidden');
+            footerSection.classList.add('hidden');
+            logoutBtn.classList.add('hidden');
+        }
+        
+        // Fungsi untuk menampilkan dashboard
+        function showDashboard() {
+            loginSection.classList.add('hidden');
+            dashboardSection.classList.remove('hidden');
+            footerSection.classList.remove('hidden');
+            logoutBtn.classList.remove('hidden');
+            
+            loadAttendanceData();
+            renderAttendanceData();
+            updateStatistics();
+        }
+        
+        // Fungsi untuk memuat data absensi
+        function loadAttendanceData() {
+            try {
+                const storedData = localStorage.getItem('attendanceData');
+                if (storedData) {
+                    attendanceData = JSON.parse(storedData);
+                } else {
+                    // Data contoh dengan tanggal yang lebih relevan
+                    const today = new Date();
+                    const yesterday = new Date(today);
+                    yesterday.setDate(yesterday.getDate() - 1);
+                    
+                    attendanceData = [
+                        {
+                            id: 1,
+                            date: formatDateForInput(today),
+                            employeeName: 'Budi Santoso',
+                            clockIn: '08:00',
+                            clockOut: '17:00',
+                            status: 'Hadir'
+                        },
+                        {
+                            id: 2,
+                            date: formatDateForInput(today),
+                            employeeName: 'Siti Rahayu',
+                            clockIn: '07:55',
+                            clockOut: '16:30',
+                            status: 'Hadir'
+                        },
+                        {
+                            id: 3,
+                            date: formatDateForInput(yesterday),
+                            employeeName: 'Budi Santoso',
+                            clockIn: '08:05',
+                            clockOut: '17:10',
+                            status: 'Hadir'
+                        },
+                        {
+                            id: 4,
+                            date: formatDateForInput(yesterday),
+                            employeeName: 'Siti Rahayu',
+                            clockIn: '',
+                            clockOut: '',
+                            status: 'Izin'
+                        }
+                    ];
+                    saveAttendanceToStorage();
+                }
+            } catch (error) {
+                console.error('Error loading attendance data:', error);
+                attendanceData = [];
+            }
+        }
+        
+        // Format tanggal untuk input
+        function formatDateForInput(date) {
+            return date.toISOString().split('T')[0];
+        }
+        
+        // Fungsi untuk menyimpan data absensi ke localStorage
+        function saveAttendanceToStorage() {
+            try {
+                localStorage.setItem('attendanceData', JSON.stringify(attendanceData));
+            } catch (error) {
+                console.error('Error saving attendance data:', error);
+                alert('Terjadi kesalahan saat menyimpan data');
+            }
+        }
+        
+        // Fungsi untuk merender data absensi ke tabel
+        function renderAttendanceData() {
+            attendanceBody.innerHTML = '';
+            
+            try {
+                // Dapatkan nilai filter
+                const monthFilter = filterMonth.value;
+                const yearFilter = filterYear.value;
+                const nameFilter = filterName.value.toLowerCase();
+                
+                // Filter data
+                const filteredData = attendanceData.filter(item => {
+                    const date = new Date(item.date);
+                    const itemMonth = String(date.getMonth() + 1).padStart(2, '0');
+                    const itemYear = String(date.getFullYear());
+                    
+                    // Filter berdasarkan bulan
+                    if (monthFilter && itemMonth !== monthFilter) return false;
+                    
+                    // Filter berdasarkan tahun
+                    if (yearFilter && itemYear !== yearFilter) return false;
+                    
+                    // Filter berdasarkan nama
+                    if (nameFilter && !item.employeeName.toLowerCase().includes(nameFilter)) return false;
+                    
+                    return true;
+                });
+                
+                // Urutkan data berdasarkan tanggal (terbaru pertama)
+                filteredData.sort((a, b) => new Date(b.date) - new Date(a.date));
+                
+                if (filteredData.length === 0) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = '<td colspan="7" class="text-center py-4">Tidak ada data absensi</td>';
+                    attendanceBody.appendChild(row);
+                    return;
+                }
+                
+                // Render data
+                filteredData.forEach((item, index) => {
+                    const row = document.createElement('tr');
+                    
+                    // Format tanggal
+                    const dateObj = new Date(item.date);
+                    const formattedDate = dateObj.toLocaleDateString('id-ID', {
+                        weekday: 'short',
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                    });
+                    
+                    // Tentukan class status
+                    const statusClass = item.status === 'Hadir' ? 'status-present' : 'status-absent';
+                    
+                    row.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td>${formattedDate}</td>
+                        <td>${item.employeeName}</td>
+                        <td>${item.clockIn || '-'}</td>
+                        <td>${item.clockOut || '-'}</td>
+                        <td class="${statusClass}">${item.status}</td>
+                        <td class="action-buttons">
+                            <button class="btn btn-sm btn-outline-primary edit-btn" data-id="${item.id}">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger delete-btn" data-id="${item.id}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    `;
+                    
+                    attendanceBody.appendChild(row);
+                });
+                
+                // Tambahkan event listener untuk tombol edit dan hapus
+                addTableEventListeners();
+                
+                // Update statistik setelah render
+                updateStatistics();
+                
+            } catch (error) {
+                console.error('Error rendering attendance data:', error);
+                attendanceBody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-danger">Terjadi kesalahan saat memuat data</td></tr>';
+            }
+        }
+        
+        // Tambah event listeners untuk tombol di tabel
+        function addTableEventListeners() {
+            document.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = parseInt(e.target.closest('.edit-btn').getAttribute('data-id'));
+                    editAttendanceData(id);
+                });
+            });
+            
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = parseInt(e.target.closest('.delete-btn').getAttribute('data-id'));
+                    deleteAttendanceData(id);
+                });
+            });
+        }
+        
+        // Fungsi untuk menampilkan form
+        function showForm() {
+            attendanceForm.classList.remove('hidden');
+            formTitle.textContent = 'Tambah Data Absensi';
+            isEditing = false;
+            currentEditId = null;
+            resetForm();
+            
+            // Scroll ke form
+            setTimeout(() => {
+                attendanceForm.scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+        }
+        
+        // Fungsi untuk menyimpan data absensi (tambah atau edit)
+        function saveAttendanceData() {
+            // Validasi input
+            if (!attendanceDate.value || !employeeName.value.trim()) {
+                alert('Tanggal dan nama karyawan harus diisi');
+                return;
+            }
+            
+            // Tampilkan loading pada tombol
+            showButtonLoading(saveDataBtn, true);
+            
+            // Simulasi delay untuk proses penyimpanan
+            setTimeout(() => {
+                try {
+                    const newData = {
+                        date: attendanceDate.value,
+                        employeeName: employeeName.value.trim(),
+                        clockIn: clockIn.value,
+                        clockOut: clockOut.value,
+                        status: statusSelect.value
+                    };
+                    
+                    if (isEditing) {
+                        // Edit data yang ada
+                        const index = attendanceData.findIndex(item => item.id === currentEditId);
+                        if (index !== -1) {
+                            attendanceData[index] = { ...attendanceData[index], ...newData };
+                            showMessage(formMessage, 'Data berhasil diperbarui');
+                        }
+                    } else {
+                        // Cek duplikasi data (nama dan tanggal yang sama)
+                        const duplicate = attendanceData.find(item => 
+                            item.employeeName.toLowerCase() === newData.employeeName.toLowerCase() && 
+                            item.date === newData.date
+                        );
+                        
+                        if (duplicate) {
+                            alert('Data absensi untuk karyawan ini pada tanggal tersebut sudah ada!');
+                            showButtonLoading(saveDataBtn, false);
+                            return;
+                        }
+                        
+                        // Tambah data baru
+                        const newId = attendanceData.length > 0 
+                            ? Math.max(...attendanceData.map(item => item.id)) + 1 
+                            : 1;
+                        
+                        attendanceData.push({
+                            id: newId,
+                            ...newData
+                        });
+                        
+                        showMessage(formMessage, 'Data berhasil ditambahkan');
+                    }
+                    
+                    // Simpan ke localStorage dan render ulang tabel
+                    saveAttendanceToStorage();
+                    renderAttendanceData();
+                    
+                    // Reset form dan sembunyikan setelah 2 detik
+                    setTimeout(() => {
+                        resetForm();
+                        attendanceForm.classList.add('hidden');
+                        formMessage.classList.add('hidden');
+                    }, 2000);
+                    
+                } catch (error) {
+                    console.error('Error saving attendance data:', error);
+                    alert('Terjadi kesalahan saat menyimpan data');
+                } finally {
+                    showButtonLoading(saveDataBtn, false);
+                }
+            }, 500);
+        }
+        
+        // Fungsi untuk mengedit data absensi
+        function editAttendanceData(id) {
+            try {
+                const dataToEdit = attendanceData.find(item => item.id === id);
+                if (dataToEdit) {
+                    // Isi form dengan data yang akan diedit
+                    attendanceDate.value = dataToEdit.date;
+                    employeeName.value = dataToEdit.employeeName;
+                    clockIn.value = dataToEdit.clockIn;
+                    clockOut.value = dataToEdit.clockOut;
+                    statusSelect.value = dataToEdit.status;
+                    
+                    // Ubah ke mode edit
+                    isEditing = true;
+                    currentEditId = id;
+                    formTitle.textContent = 'Edit Data Absensi';
+                    attendanceForm.classList.remove('hidden');
+                    
+                    // Scroll ke form
+                    setTimeout(() => {
+                        attendanceForm.scrollIntoView({ behavior: 'smooth' });
+                    }, 100);
+                }
+            } catch (error) {
+                console.error('Error editing attendance data:', error);
+                alert('Terjadi kesalahan saat mengedit data');
+            }
+        }
+        
+        // Fungsi untuk menghapus data absensi
+        function deleteAttendanceData(id) {
+            if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
+                try {
+                    attendanceData = attendanceData.filter(item => item.id !== id);
+                    saveAttendanceToStorage();
+                    renderAttendanceData();
+                    
+                    // Jika sedang mengedit data yang dihapus, reset form
+                    if (isEditing && currentEditId === id) {
+                        resetForm();
+                        attendanceForm.classList.add('hidden');
+                    }
+                } catch (error) {
+                    console.error('Error deleting attendance data:', error);
+                    alert('Terjadi kesalahan saat menghapus data');
+                }
+            }
+        }
+        
+        // Fungsi untuk membatalkan edit
+        function cancelEdit() {
+            resetForm();
+            attendanceForm.classList.add('hidden');
+        }
+        
+        // Fungsi untuk mereset form
+        function resetForm() {
+            attendanceDate.value = new Date().toISOString().split('T')[0];
+            employeeName.value = '';
+            clockIn.value = '';
+            clockOut.value = '';
+            statusSelect.value = 'Hadir';
+            
+            isEditing = false;
+            currentEditId = null;
+            formMessage.classList.add('hidden');
+        }
+        
+        // Fungsi untuk menampilkan pesan error
+        function showError(element, message) {
+            element.textContent = message;
+            element.classList.remove('hidden');
+            
+            // Hapus pesan setelah 5 detik
+            setTimeout(() => {
+                element.classList.add('hidden');
+            }, 5000);
+        }
+        
+        // Fungsi untuk menampilkan pesan sukses
+        function showMessage(element, message) {
+            element.textContent = message;
+            element.classList.remove('hidden');
+        }
+        
+        // Fungsi untuk menampilkan/menyembunyikan loading indicator
+        function showLoadingIndicator(show) {
+            if (show) {
+                loadingIndicator.classList.remove('hidden');
+            } else {
+                loadingIndicator.classList.add('hidden');
+            }
+        }
+        
+        // Fungsi untuk menampilkan loading pada tombol
+        function showButtonLoading(button, show) {
+            const btnText = button.querySelector('.btn-text');
+            const btnSpinner = button.querySelector('.btn-spinner');
+            
+            if (show) {
+                btnText.classList.add('hidden');
+                btnSpinner.classList.remove('hidden');
+                button.disabled = true;
+            } else {
+                btnText.classList.remove('hidden');
+                btnSpinner.classList.add('hidden');
+                button.disabled = false;
+            }
+        }
+        
+        // Fungsi untuk update statistik
+        function updateStatistics() {
+            try {
+                const today = new Date().toISOString().split('T')[0];
+                const currentMonth = new Date().getMonth() + 1;
+                const currentYear = new Date().getFullYear();
+                
+                // Hitung kehadiran hari ini
+                const todayData = attendanceData.filter(item => item.date === today);
+                const todayPresent = todayData.filter(item => item.status === 'Hadir').length;
+                const todayAbsent = todayData.filter(item => item.status !== 'Hadir').length;
+                
+                // Hitung total karyawan unik
+                const uniqueEmployees = [...new Set(attendanceData.map(item => item.employeeName))];
+                
+                // Hitung persentase kehadiran bulan ini
+                const monthlyData = attendanceData.filter(item => {
+                    const date = new Date(item.date);
+                    return date.getMonth() + 1 === currentMonth && date.getFullYear() === currentYear;
+                });
+                
+                const monthlyPresent = monthlyData.filter(item => item.status === 'Hadir').length;
+                const monthlyTotal = monthlyData.length;
+                const monthlyPercentage = monthlyTotal > 0 ? Math.round((monthlyPresent / monthlyTotal) * 100) : 0;
+                
+                // Update elemen statistik
+                todayPresentEl.textContent = todayPresent;
+                todayAbsentEl.textContent = todayAbsent;
+                totalEmployeesEl.textContent = uniqueEmployees.length;
+                monthlyAttendanceEl.textContent = `${monthlyPercentage}%`;
+                
+            } catch (error) {
+                console.error('Error updating statistics:', error);
+            }
+        }
+        
+        // Fungsi untuk export data ke JSON
+        function exportData() {
+            try {
+                const dataToExport = {
+                    exportDate: new Date().toISOString(),
+                    attendanceData: attendanceData
+                };
+                
+                const dataStr = JSON.stringify(dataToExport, null, 2);
+                const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                
+                const url = URL.createObjectURL(dataBlob);
+                const downloadLink = document.createElement('a');
+                downloadLink.href = url;
+                downloadLink.download = `attendance_data_${new Date().toISOString().split('T')[0]}.json`;
+                
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+                
+                URL.revokeObjectURL(url);
+                alert('Data berhasil diekspor!');
+                
+            } catch (error) {
+                console.error('Error exporting data:', error);
+                alert('Terjadi kesalahan saat mengekspor data');
+            }
+        }
+        
+        // Fungsi untuk import data dari JSON
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            if (file.type !== 'application/json') {
+                alert('Silakan pilih file JSON yang valid');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    
+                    if (importedData.attendanceData && Array.isArray(importedData.attendanceData)) {
+                        if (confirm('Import data akan mengganti semua data yang ada. Lanjutkan?')) {
+                            attendanceData = importedData.attendanceData;
+                            saveAttendanceToStorage();
+                            renderAttendanceData();
+                            alert('Data berhasil diimpor!');
+                        }
+                    } else {
+                        alert('Format file tidak valid');
+                    }
+                } catch (error) {
+                    console.error('Error importing data:', error);
+                    alert('File tidak valid atau rusak');
+                }
+            };
+            
+            reader.readAsText(file);
+            event.target.value = ''; // Reset input
+        }
+        
+        // Fungsi untuk menghapus semua data
+        function clearAllData() {
+            if (confirm('Apakah Anda yakin ingin menghapus SEMUA data absensi? Tindakan ini tidak dapat dibatalkan!')) {
+                if (confirm('Konfirmasi sekali lagi: Semua data akan dihapus permanen!')) {
+                    try {
+                        attendanceData = [];
+                        saveAttendanceToStorage();
+                        renderAttendanceData();
+                        
+                        // Reset form jika sedang aktif
+                        if (!attendanceForm.classList.contains('hidden')) {
+                            resetForm();
+                            attendanceForm.classList.add('hidden');
+                        }
+                        
+                        alert('Semua data berhasil dihapus');
+                    } catch (error) {
+                        console.error('Error clearing data:', error);
+                        alert('Terjadi kesalahan saat menghapus data');
+                    }
+                }
+            }
+        }
+        
+        // Inisialisasi aplikasi saat DOM dimuat
+        document.addEventListener('DOMContentLoaded', initializeApp);
+    </script>
+</body>
+</html>
